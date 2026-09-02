@@ -1,5 +1,6 @@
 import { Image } from 'expo-image';
-import { Platform, StyleSheet , View, Text} from 'react-native';
+import { useState } from 'react';
+import { Platform, StyleSheet , View, Text, ScrollView, TextInput, Alert, Pressable} from 'react-native';
 
 import { HelloWave } from '@/components/hello-wave';
 import ParallaxScrollView from '@/components/parallax-scroll-view';
@@ -8,60 +9,156 @@ import { ThemedView } from '@/components/themed-view';
 import { Link } from 'expo-router';
 
 export default function HomeScreen() {
+  const [name, setName] = useState('');
+  const [yearCourse, setYearCourse] = useState('');
+  const [subject, setSubject] = useState('');
+  const [code, setCode] = useState('');
+
+  const [savedName, setSavedName] = useState('Trisha G. Facundo');
+  const [savedYearCourse, setSavedYearCourse] = useState('3rd Year BSIT');
+  const [savedSubject, setSavedSubject] = useState('CCE106');
+  const [savedCode, setSavedCode] = useState('2013');
+
+  const saveData = () => {
+    if (
+      !name.trim() ||
+      !yearCourse.trim() ||
+      !subject.trim() ||
+      !code.trim()
+    ) {
+      Alert.alert(
+        'Required Information',
+        'Please fill in all the fields before saving.'
+      );
+      return;
+    }
+     setSavedName(name);
+    setSavedYearCourse(yearCourse);
+    setSavedSubject(subject);
+    setSavedCode(code);
+
+    Alert.alert(
+      'Success',
+      'Your information has been saved!'
+    );
+  };
+
   return (
-    
-      
     <View style={styles.background}>
-      <View style={{margin:20}}>
+      <View style={{ margin: 20 }}>
+
         <Text style={[styles.bee, styles.bee1]}>🐝</Text>
         <Text style={[styles.bee, styles.bee2]}>🐝</Text>
         <Text style={[styles.bee, styles.bee3]}>🐝</Text>
         <Text style={[styles.bee, styles.bee4]}>🐝</Text>
         <Text style={[styles.bee, styles.bee5]}>🐝</Text>
+
         <Text style={[styles.flower, styles.flower1]}>🌼</Text>
         <Text style={[styles.flower, styles.flower2]}>🌼</Text>
 
-        <View style={styles.card}>
-          <Image
-            source={require('@/assets/images/minecraft_bee.avif')}
-            style={styles.beepic}
-          />
+        <ScrollView>
 
-            <Text style={styles.textHeader}> Bee Bot</Text>
-            <Text style={styles.normalText}>An automated bot that can detect damages of your laptop inside and out.</Text>
-        </View>
+          <Text style={styles.textHeader}>
+            Personal Profile Screen
+          </Text>
 
-        <Text style={styles.subHeading}>Features</Text>
-        <View style={styles.card2}>
-          <Text>Smart AI Asssistant</Text>
-        </View>
-        <View style={styles.card2}>
-          <Text>Friendly User Interface</Text>
-        </View>
+          <View style={{ alignItems: 'center' }}>
+            <Image
+              source={require('@/assets/images/minecraft_bee.avif')}
+              style={styles.beepic}
+            />
+          </View>
 
-        <View style={styles.card3}>
-          <View style={{marginBottom:10}}><Text style={styles.subHeading}>Student Information</Text></View>
-          <View style={{marginBottom:10}}>
-            <Text style={styles.textLabel}>Name</Text>
-            <Text style={styles.textInfo}>Trisha G. Facundo</Text>
+          <View style={styles.card3}>
+            <View style={{ marginBottom: 10 }}>
+              <Text style={styles.subHeading}>
+                Student Information
+              </Text>
+            </View>
+
+            <View style={{ marginBottom: 10 }}>
+              <Text style={styles.textLabel}>Full Name</Text>
+              <Text style={styles.textInfo}>
+                {savedName}
+              </Text>
+            </View>
+
+            <View style={{ marginBottom: 10 }}>
+              <Text style={styles.textLabel}>Program</Text>
+              <Text style={styles.textInfo}>
+                {savedYearCourse}
+              </Text>
+            </View>
+
+            <View style={{ marginBottom: 10 }}>
+              <Text style={styles.textLabel}>Short Biography</Text>
+              <Text style={styles.textInfo}>
+                {savedSubject}
+              </Text>
+            </View>
+
+            <View>
+              <Text style={styles.textLabel}>Contact Information</Text>
+              <Text style={styles.textInfo}>
+                {savedCode}
+              </Text>
+            </View>
           </View>
-          <View style={{marginBottom:10}}>
-            <Text style={styles.textLabel}>Year & Course</Text>
-            <Text style={styles.textInfo}>3rd Year BSIT</Text>
+
+          <View style={styles.card3}>
+
+            <Text style={styles.subHeading}>
+              Edit Information
+            </Text>
+
+            <View style={styles.container}>
+              <TextInput
+                placeholder="Enter your name"
+                value={name}
+                onChangeText={setName}
+                style={styles.input}
+              />
+            </View>
+
+            <View style={styles.container}>
+              <TextInput
+                placeholder="Enter your program"
+                value={yearCourse}
+                onChangeText={setYearCourse}
+                style={styles.input}
+              />
+            </View>
+
+            <View style={styles.container}>
+              <TextInput
+                placeholder="Enter your short biography"
+                value={subject}
+                onChangeText={setSubject}
+                style={styles.input}
+              />
+            </View>
+
+            <View style={styles.container}>
+              <TextInput
+                placeholder="Enter contact information"
+                value={code}
+                onChangeText={setCode}
+                style={styles.input}
+              />
+            </View>
+
+            <Pressable
+              style={styles.saveButton}
+              onPress={saveData}
+            >
+              <Text style={styles.saveButtonText}>Save</Text>
+            </Pressable>
+
           </View>
-          <View style={{marginBottom:10}}>
-            <Text style={styles.textLabel}>Subject</Text>
-            <Text style={styles.textInfo}>CCE106</Text>
-          </View>
-          <View>
-            <Text style={styles.textLabel}>Code</Text>
-            <Text style={styles.textInfo}>2013</Text>
-          </View>
-          
-        </View>
+
+        </ScrollView>
       </View>
     </View>
-  
   );
 }
 
@@ -117,7 +214,7 @@ const styles = StyleSheet.create({
   },
   textLabel:{
     fontSize:11,
-    color: '#A08B66',
+    color: '#d3d3d3',
     fontWeight: '600',
   },
   textInfo:{
@@ -130,7 +227,8 @@ const styles = StyleSheet.create({
     width: 190,
     height: 160,
     marginTop: 5,
-    borderRadius:10,
+    borderRadius:80,
+    flex: 1,
   },
   background: {
     flex: 1,
@@ -190,4 +288,27 @@ const styles = StyleSheet.create({
     top: 580,
     left: 15,
   },
+  container: {
+    padding: 20,
+  },
+
+  input: {
+    borderWidth: 1,
+    padding: 10,
+    borderRadius: 5,
+    borderColor: '#d3d3d3'
+  },
+  saveButton: {
+  backgroundColor: '#FFD95A',
+  padding: 15,
+  borderRadius: 10,
+  alignItems: 'center',
+  marginTop: 10,
+},
+
+saveButtonText: {
+  color: '#4A2C00',
+  fontSize: 16,
+  fontWeight: 'bold',
+},
 });
