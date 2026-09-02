@@ -1,118 +1,188 @@
 import React, { useState } from 'react';
-import { View,Text, Pressable, StyleSheet} from 'react-native';
+import {View,Text,TextInput,TouchableOpacity, StyleSheet,} from 'react-native';
 
 export default function App() {
 
-  const [counter, setCounter] = useState(0);
+  const [num1, setNum1] = useState('');
+  const [num2, setNum2] = useState('');
 
-  const increaseCounter = () => {
-    setCounter(counter + 1);
-  };
+  const [result, setResult] = useState('');
 
-  const decreaseCounter = () => {
-    if (counter > 0) {
-      setCounter(counter - 1);
+  const calculate = (operator: string) => {
+
+    if (num1 === '' || num2 === '') {
+      setResult('Please enter both numbers.');
+      return;
+    }
+
+    const number1 = Number(num1);
+    const number2 = Number(num2);
+
+    if (isNaN(number1) || isNaN(number2)) {
+      setResult('Please enter valid numbers.');
+      return;
+    }
+
+    if (operator === '+') {
+      setResult(String(number1 + number2));
+    }
+
+    // Subtraction
+    else if (operator === '-') {
+      setResult(String(number1 - number2));
+    }
+
+    else if (operator === '*') {
+      setResult(String(number1 * number2));
+    }
+
+    else if (operator === '/') {
+
+      if (number2 === 0) {
+        setResult('Cannot divide by zero.');
+        return;
+      }
+
+      setResult(String(number1 / number2));
     }
   };
 
-  const resetCounter = () => {
-    setCounter(0);
+  const clearCalculator = () => {
+    setNum1('');
+    setNum2('');
+    setResult('');
   };
 
   return (
     <View style={styles.container}>
-      <View style={styles.container2}>
-        <Text style={styles.title}>Counter App</Text>
 
-        <Text style={styles.counter}>
-          {counter}
-        </Text>
+      <Text style={styles.title}>Simple Calculator</Text>
 
-        <Pressable
-          style={styles.increaseButton}
-          onPress={increaseCounter}
+      <TextInput
+        style={styles.input}
+        placeholder="Enter first number"
+        keyboardType="numeric"
+        value={num1}
+        onChangeText={setNum1}
+      />
+
+      <TextInput
+        style={styles.input}
+        placeholder="Enter second number"
+        keyboardType="numeric"
+        value={num2}
+        onChangeText={setNum2}
+      />
+
+      <View style={styles.buttonRow}>
+
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => calculate('+')}
         >
-          <Text style={styles.buttonText}>+ Increase</Text>
-        </Pressable>
+          <Text style={styles.buttonText}>+</Text>
+        </TouchableOpacity>
 
-        <Pressable
-          style={styles.decreaseButton}
-          onPress={decreaseCounter}
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => calculate('-')}
         >
-          <Text style={styles.buttonText}>- Decrease</Text>
-        </Pressable>
+          <Text style={styles.buttonText}>-</Text>
+        </TouchableOpacity>
 
-        <Pressable
-          style={styles.resetButton}
-          onPress={resetCounter}
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => calculate('*')}
         >
-          <Text style={styles.buttonText}>Reset</Text>
-        </Pressable>
+          <Text style={styles.buttonText}>×</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => calculate('/')}
+        >
+          <Text style={styles.buttonText}>÷</Text>
+        </TouchableOpacity>
+
       </View>
+
+      <Text style={styles.result}>
+        Result: {result}
+      </Text>
+
+      <TouchableOpacity
+        style={styles.clearButton}
+        onPress={clearCalculator}
+      >
+        <Text style={styles.clearText}>Clear</Text>
+      </TouchableOpacity>
+
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container2:{
-    flex: 1,
-    justifyContent:'center',
-    alignItems:'center',
-    backgroundColor:'rgba(255,255,255,0.5)',
-    padding: 50,
-    marginTop: 100,
-    marginBottom: 100,
-    borderRadius: 25
-  },
   container: {
     flex: 1,
     justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor:'pink'
+    padding: 20,
+    backgroundColor: '#d1eee4',
   },
 
   title: {
-    fontSize: 30,
+    fontSize: 28,
     fontWeight: 'bold',
-    marginBottom: 20,
-  },
-
-  counter: {
-    fontSize: 60,
-    fontWeight: 'bold',
+    textAlign: 'center',
     marginBottom: 30,
   },
 
-    increaseButton: {
-    backgroundColor: '#80ef80',
-    padding: 15,
-    width: 200,
-    alignItems: 'center',
-    marginBottom: 10,
-    borderRadius: 10,
+  input: {
+    borderWidth: 1,
+    borderColor: '#999',
+    borderRadius: 8,
+    padding: 12,
+    fontSize: 18,
+    marginBottom: 15,
   },
 
-  decreaseButton: {
-    backgroundColor: '#ffee8c',
-    padding: 15,
-    width: 200,
-    alignItems: 'center',
-    marginBottom: 10,
-    borderRadius: 10,
+  buttonRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 10,
   },
 
-  resetButton: {
-    backgroundColor: '#ff746c',
-    padding: 15,
-    width: 200,
+  button: {
+    backgroundColor: '#469af3',
+    padding: 18,
+    borderRadius: 8,
+    width: '22%',
     alignItems: 'center',
-    marginBottom: 10,
-    borderRadius: 10,
   },
 
   buttonText: {
-    color: '#1d1c1a',
-    fontSize: 18,
+    color: '#fff',
+    fontSize: 24,
     fontWeight: 'bold',
+  },
+
+  result: {
+    fontSize: 22,
+    textAlign: 'center',
+    marginTop: 30,
+    fontWeight: 'bold',
+    color: 'green'
+  },
+
+  clearButton: {
+    backgroundColor: 'rgb(211, 80, 80)',
+    padding: 15,
+    borderRadius: 8,
+    marginTop: 20,
+    alignItems: 'center',
+  },
+
+  clearText: {
+    color: '#fff9f9',
+    fontSize: 20,
   },
 });
