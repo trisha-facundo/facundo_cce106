@@ -3,15 +3,17 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { ThemedText } from "@/components/themed-text";
 
 import Container from "@/components/container-box";
+import { useAuth } from '@/context/AuthContext';
 
 export default function HomeScreen() {
+  const { user } = useAuth();
   return (
     <SafeAreaView  style={styles.container}>
       <ScrollView>
         <View>
           <View style={{marginBottom: "5%"}}>
             <ThemedText darkColor="gray" type="subtitle"style={{marginBottom: "3%"}}>Good morning</ThemedText>
-            <ThemedText darkColor="black" type="title">Trisha</ThemedText>
+            <ThemedText darkColor="black" type="title">{user?.name}</ThemedText>
           </View>
 
           <View style={{marginBottom: "5%"}}>

@@ -2,8 +2,10 @@ import { View, StyleSheet, ScrollView, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ThemedText } from '@/components/themed-text';
 import Container from '@/components/container-box';
+import { useAuth } from '@/context/AuthContext';
 
 export default function ProfileScreen() {
+  const { user } = useAuth();
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView>
@@ -12,8 +14,8 @@ export default function ProfileScreen() {
               source={require("@/assets/images/react-logo.png")}
               style={styles.image}
             />
-            <ThemedText darkColor='black' type='title'>Trisha</ThemedText>
-            <ThemedText darkColor='gray' type='subtitle'>trisha@gmail.com</ThemedText>
+            <ThemedText darkColor='black' type='title'>{user?.name}</ThemedText>
+            <ThemedText darkColor='gray' type='subtitle'>{user?.email}</ThemedText>
           </View>
 
           <Container color='white'>

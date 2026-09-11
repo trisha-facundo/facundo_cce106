@@ -1,26 +1,25 @@
+import { Stack } from "expo-router";
+import { StatusBar } from "expo-status-bar";
+import "react-native-reanimated";
 
-import { Stack } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
-import 'react-native-reanimated';
+import { AuthProvider } from "../context/AuthContext";
 
 export const unstable_settings = {
-  anchor: '(tabs)',
+  anchor: "(tabs)",
 };
 
 export default function RootLayout() {
-
-
   return (
-    <>
+    <AuthProvider>
       <Stack>
         <Stack.Screen
           name="sign-in"
-          options={{headerShown: false}}
+          options={{ headerShown: false }}
         />
 
         <Stack.Screen
           name="sign-up"
-          options={{headerShown: false}}
+          options={{ headerShown: false }}
         />
 
         <Stack.Screen
@@ -29,15 +28,12 @@ export default function RootLayout() {
         />
 
         <Stack.Screen
-          name="modal"
-          options={{
-            presentation: 'modal',
-            title: 'Modal',
-          }}
+          name="account/[id]"
+          options={{ headerShown: false }}
         />
       </Stack>
 
       <StatusBar style="auto" />
-    </>
+    </AuthProvider>
   );
 }
