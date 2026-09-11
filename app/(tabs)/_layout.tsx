@@ -1,18 +1,21 @@
 import { Tabs } from 'expo-router';
-import React from 'react';
-
 import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Colors } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import { View } from "react-native";
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
-
   return (
     <Tabs
       screenOptions={{
-tabBarActiveTintColor: Colors[colorScheme === 'dark' ? 'dark' : 'light'].tint,
+        tabBarActiveTintColor:"#1B5E20",
         headerShown: false,
+        tabBarStyle: { height: 60 },
+        tabBarBackground: () => (
+                  <View
+                    style={{
+                      flex: 1,
+                      backgroundColor: "#E8F5E9",
+                    }}
+                  />),
       }}
     >
       <Tabs.Screen
@@ -21,7 +24,7 @@ tabBarActiveTintColor: Colors[colorScheme === 'dark' ? 'dark' : 'light'].tint,
           title: 'Home',
           tabBarIcon: ({ color }) => (
             <IconSymbol
-              size={28}
+              size={24}
               name="house.fill"
               color={color}
             />
@@ -30,18 +33,32 @@ tabBarActiveTintColor: Colors[colorScheme === 'dark' ? 'dark' : 'light'].tint,
       />
 
       <Tabs.Screen
-        name="explore"
+        name="profile"
         options={{
-          title: 'Explore',
-          tabBarIcon: ({ color }) => (
-            <IconSymbol
-              size={28}
-              name="paperplane.fill"
-              color={color}
-            />
-          ),
-        }}
+          title: 'Profile',
+            tabBarIcon: ({ color }) => (
+              <IconSymbol
+                size={24}
+                name="person.fill"
+                color={color}
+              />
+            ),
+          }}
       />
-    </Tabs>
+
+      <Tabs.Screen
+        name="settings"
+        options={{
+          title: 'Settings',
+            tabBarIcon: ({ color }) => (
+              <IconSymbol
+                size={24}
+                name="gearshape.fill"
+                color={color}
+              />
+            ),
+          }}
+        />
+      </Tabs>
   );
 }
