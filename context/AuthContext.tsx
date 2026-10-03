@@ -18,7 +18,9 @@ type AuthContextValue = {
   restoreSession: () => Promise<void>;
 };
 
-export const AuthContext = createContext<AuthContextValue | undefined>(undefined);
+const TOKEN_KEY = 'accessToken';
+
+export const AuthContext =createContext<AuthContextValue | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [token, setToken] = useState<string | null>(null);
@@ -27,9 +29,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [authLoading, setAuthLoading] = useState(false);
 
   const login = async (accessToken: string, userData: User) => {
-    // TODO EXAM: Save the access token with SecureStore.setItemAsync().
-    // TODO EXAM: Update token state and user state with the supplied arguments.
-    // TODO EXAM: Handle storage failures; never store the password.
+    // Only the token is saved, never the password.
+    // SecureStore works on Android/iOS; on web it is unavailable, so the session stays in memory only.
+    try {
+      if (await SecureStore.isAvailableAsync()) {
+        await SecureStore.setItemAsync(TOKEN_KEY, accessToken);
+      }
+    } catch {
+      throw new Error('Could not save your session securely. Please try again.');
+    }
+
+    // Updating these two states is what makes the app treat the user as logged in.
+    setToken(accessToken);
+    setUser(userData);
   };
 
   const logout = async () => {

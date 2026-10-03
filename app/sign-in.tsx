@@ -1,21 +1,61 @@
-/* eslint-disable @typescript-eslint/no-unused-vars -- Setters are reserved for the login exercise. */
 import { useState } from 'react';
+import { useRouter } from 'expo-router';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { API_BASE_URL } from '@/constants/api';
+import { useAuth } from '@/hooks/useAuth';
 
 export default function SignInScreen() {
+  const router = useRouter();
+  const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
   const handleLogin = async () => {
-    // TODO EXAM: 1. Validate email and password.
-    // TODO EXAM: 2. Set loading and clear previous errors.
-    // TODO EXAM: 3. POST to /login using fetch() and async/await.
-    // TODO EXAM: 4. Check response.ok and parse the returned JSON.
-    // TODO EXAM: 5. Pass the returned access token and user to the context login().
-    // TODO EXAM: 6. Navigate using router.replace() after successful authentication.
-    // TODO EXAM: 7. Handle login errors and stop loading in finally.
+    // 1. Validate email and password.
+    if (!email.trim() || !password) {
+      setError('Please enter your email and password.');
+      return;
+    }
+
+    // 2. Show the loading state and clear any previous error.
+    setLoading(true);
+    setError('');
+
+    try {
+      // 3. Send the credentials to POST /login.
+      const response = await fetch(`${API_BASE_URL}/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email.trim(), password }),
+      });
+      const data = await response.json();
+
+      // 4. A wrong email/password comes back as 401 with a message from the API.
+      if (!response.ok) {
+        setError(data.message || 'Login failed. Please try again.');
+        return;
+      }
+
+      // 5. Save the token + user in AuthContext (the token goes to SecureStore).
+      await login(data.token, data.user);
+
+      // 6. Go to the dashboard; replace() so Back does not return to the login screen.
+      router.replace('/(app)');
+    } catch (err) {
+      // A TypeError means fetch could not reach the server at all.
+      setError(
+        err instanceof TypeError
+          ? 'Cannot reach the server. Make sure the API is running (npm run api).'
+          : err instanceof Error
+            ? err.message
+            : 'Something went wrong. Please try again.'
+      );
+    } finally {
+      // 7. Always stop the loading state.
+      setLoading(false);
+    }
   };
 
   return (
@@ -35,7 +75,6 @@ export default function SignInScreen() {
         <Pressable accessibilityRole="button" style={styles.button} onPress={handleLogin} disabled={loading}>
           <Text style={styles.buttonText}>{loading ? 'Signing in…' : 'Login'}</Text>
         </Pressable>
-        <Text style={styles.note}>Exam starter: login is not implemented yet.</Text>
       </View>
     </ScrollView>
   );

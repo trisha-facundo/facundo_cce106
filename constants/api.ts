@@ -1,8 +1,19 @@
-// TODO EXAM: Use the API base URL provided by the instructor.
-export const API_BASE_URL = "https://jsonplaceholder.typicode.com";
+import { Platform } from 'react-native';
 
-// Expected endpoints:
-// POST /login
+// The only place the API address is set.
+// Android emulator: leave USE_PHYSICAL_PHONE = false (10.0.2.2 is the emulator's name for your PC).
+// Physical Android phone (Expo Go): set USE_PHYSICAL_PHONE = true and put your PC's Wi-Fi IPv4 in PC_LAN_IP
+// (run `ipconfig` to find it). The phone and PC must be on the same Wi-Fi.
+const USE_PHYSICAL_PHONE = false;
+const PC_LAN_IP = '192.168.1.23';
+const PORT = 3000;
+
+const host = Platform.OS === 'android' ? (USE_PHYSICAL_PHONE ? PC_LAN_IP : '10.0.2.2') : 'localhost';
+
+export const API_BASE_URL = `http://${host}:${PORT}`;
+
+// Endpoints (Express server in /server):
+// POST /login  { email, password } -> { token, user }
 // GET /students
 // GET /students/{id}
 // GET /profile
