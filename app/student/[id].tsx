@@ -1,12 +1,14 @@
 /* eslint-disable @typescript-eslint/no-unused-vars -- State setters and loader are exam placeholders. */
 import { useEffect, useState } from 'react';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { Redirect, useLocalSearchParams, useRouter } from 'expo-router';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { type Student } from '@/components/StudentCard';
+import { useAuth } from '@/hooks/useAuth';
 
 export default function StudentDetailsScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
+  const { token, authLoading } = useAuth();
   const [student, setStudent] = useState<Student | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -23,6 +25,10 @@ export default function StudentDetailsScreen() {
   useEffect(() => {
     // TODO EXAM: Call loadStudent() when id changes.
   }, [id]);
+
+  // Route protection: unauthenticated users go to the real /sign-in URL.
+  if (authLoading) return null;
+  if (!token) return <Redirect href="/sign-in" />;
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
