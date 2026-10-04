@@ -1,5 +1,6 @@
 // Minimal Express API for the Student Service Portal.
 // Start it with: npm run api
+const { Buffer } = require('buffer');
 const crypto = require('crypto');
 const cors = require('cors');
 const express = require('express');
@@ -10,6 +11,13 @@ const PORT = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json());
+
+// Checks a typed password against a stored "salt:hash" string without needing the original password.
+function passwordMatches(password, storedHash) {
+  const [salt, hash] = storedHash.split(':');
+  const attempt = crypto.scryptSync(password, salt, 64);
+  return crypto.timingSafeEqual(attempt, Buffer.from(hash, 'hex'));
+}
 
 // Generated tokens are kept in memory: token -> user.
 // Later endpoints will look tokens up here to find who is calling.
@@ -23,7 +31,7 @@ app.post('/login', (req, res) => {
     return res.status(400).json({ message: 'Email and password are required.' });
   }
 
-  const found = users.find((u) => u.email === email && u.password === password);
+  const found = users.find((u) => u.email === email && passwordMatches(password, u.passwordHash));
   if (!found) {
     return res.status(401).json({ message: 'Invalid email or password.' });
   }

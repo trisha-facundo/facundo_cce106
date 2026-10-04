@@ -1,11 +1,12 @@
 // In-memory demo data. Nothing is saved to a database.
-// The password lives only on the server; the app never stores it.
+// Passwords are never kept in plain text: each user has a salted scrypt hash in "salt:hash" form.
+// The app never stores the password either.
 const users = [
   {
     id: 1,
     name: 'Demo Student',
     email: 'student@example.com',
-    password: 'password123',
+    passwordHash: 'e26633960c3dddc4f8c970c973c3e887:f6eebfc817b554cc4ffcbb56fc397e5898b8ed18406a006509599c66c30d3fe1d0e29068110c0258235c7aafca176a2427fe059afae453c78545e969047883c8',
     role: 'Student',
   },
 ];
