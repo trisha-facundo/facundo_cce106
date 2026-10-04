@@ -1,6 +1,7 @@
-/* eslint-disable @typescript-eslint/no-unused-vars -- Setters and imports are reserved for exam TODOs. */
 import { createContext, useEffect, useState, type ReactNode } from 'react';
+import { useRouter } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
+import { ApiError, getProfile } from '@/lib/api';
 
 export type User = {
   id?: string | number;
@@ -23,10 +24,11 @@ const TOKEN_KEY = 'accessToken';
 export const AuthContext =createContext<AuthContextValue | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
+  const router = useRouter();
   const [token, setToken] = useState<string | null>(null);
   const [user, setUser] = useState<User | null>(null);
-  // False keeps the unfinished starter usable; no session has been restored yet.
-  const [authLoading, setAuthLoading] = useState(false);
+  // Starts true so the app waits for restoreSession() instead of flashing the wrong screen.
+  const [authLoading, setAuthLoading] = useState(true);
 
   const login = async (accessToken: string, userData: User) => {
     // Only the token is saved, never the password.
@@ -45,26 +47,53 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const logout = async () => {
-    // TODO EXAM: Delete the saved token using SecureStore.deleteItemAsync().
-    // TODO EXAM: Clear token state and user state.
-    // TODO EXAM: Handle storage errors and redirect to /sign-in after logout.
+    try {
+      // Delete the saved token so the session is not restored the next time the app starts.
+      if (await SecureStore.isAvailableAsync()) {
+        await SecureStore.deleteItemAsync(TOKEN_KEY);
+      }
+    } catch (error) {
+      console.warn('Could not delete the saved token:', error);
+    } finally {
+      // Always log out in memory, even if the storage call failed.
+      setToken(null);
+      setUser(null);
+      router.replace('/sign-in');
+    }
   };
 
   const restoreSession = async () => {
-    // TODO EXAM: Set authLoading while restoring the session.
-    // TODO EXAM: Read the saved token with SecureStore.getItemAsync().
-    // TODO EXAM: Validate the token via GET /profile with a Bearer token.
-    // TODO EXAM: Update token and user state for a valid session.
-    // TODO EXAM: Handle 401 Unauthorized / expired sessions and clear invalid credentials.
-    // TODO EXAM: Handle errors and stop authLoading in finally.
+    // Keep the app on its loading screen while we check for a saved session.
+    setAuthLoading(true);
+
+    try {
+      // On web SecureStore is unavailable, so there is nothing to restore.
+      if (!(await SecureStore.isAvailableAsync())) return;
+
+      const savedToken = await SecureStore.getItemAsync(TOKEN_KEY);
+      if (!savedToken) return;
+
+      // Ask the API if the saved token is still valid (GET /profile with the Bearer token).
+      const profile = await getProfile(savedToken);
+      setToken(savedToken);
+      setUser(profile);
+    } catch (error) {
+      if (error instanceof ApiError && error.status === 401) {
+        // The token expired or the server forgot it: remove it and show the login screen.
+        await SecureStore.deleteItemAsync(TOKEN_KEY).catch(() => {});
+      }
+      // Any other error (for example the API is offline): stay logged out, keep the token for next time.
+    } finally {
+      setAuthLoading(false);
+    }
   };
 
+  // Restore a saved session once when the app starts.
   useEffect(() => {
-    // TODO EXAM: Call restoreSession() on startup.
+    restoreSession();
+
   }, []);
 
-  // SecureStore is native-only. The web skeleton makes no storage calls.
-  // TODO EXAM: Check platform availability before storage calls; test persistence on Android/iOS.
   return (
     <AuthContext.Provider value={{ token, user, authLoading, login, logout, restoreSession }}>
       {children}

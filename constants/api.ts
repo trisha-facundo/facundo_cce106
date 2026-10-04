@@ -14,7 +14,7 @@ export const API_BASE_URL = `http://${host}:${PORT}`;
 
 // Endpoints (Express server in /server):
 // POST /login  { email, password } -> { token, user }
-// GET /students
-// GET /students/{id}
-// GET /profile
-// TODO EXAM: Confirm request/response fields against the instructor's API documentation.
+// GET /students       -> [ { id, name, email, course } ]
+// GET /students/{id}  -> { id, name, email, course }  (404 if not found)
+// GET /profile        -> { id, name, email, role }
+// All endpoints except /login need the header  Authorization: Bearer <token>.
