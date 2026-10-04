@@ -56,6 +56,25 @@ app.get('/students', requireAuth, (req, res) => {
   res.status(200).json(students);
 });
 
+// GET /students/:id  ->  one student, or 404 if the id does not exist   (protected)
+app.get('/students/:id', requireAuth, (req, res) => {
+  const student = students.find((s) => String(s.id) === req.params.id);
+
+  if (!student) {
+    return res.status(404).json({ message: 'Student not found.' });
+  }
+
+  res.status(200).json(student);
+});
+
+// GET /profile  ->  the profile of whoever owns the token   (protected)
+app.get('/profile', requireAuth, (req, res) => {
+  const found = users.find((u) => u.id === req.user.id);
+
+  // Never send the password back to the app.
+  res.status(200).json({ id: found.id, name: found.name, email: found.email, role: found.role });
+});
+
 // '0.0.0.0' lets an Android emulator or phone on the same Wi-Fi reach this server.
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`API running on http://localhost:${PORT}`);

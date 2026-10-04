@@ -4,8 +4,8 @@ import { Platform } from 'react-native';
 // Android emulator: leave USE_PHYSICAL_PHONE = false (10.0.2.2 is the emulator's name for your PC).
 // Physical Android phone (Expo Go): set USE_PHYSICAL_PHONE = true and put your PC's Wi-Fi IPv4 in PC_LAN_IP
 // (run `ipconfig` to find it). The phone and PC must be on the same Wi-Fi.
-const USE_PHYSICAL_PHONE = false;
-const PC_LAN_IP = '192.168.1.23';
+const USE_PHYSICAL_PHONE = true;
+const PC_LAN_IP = '192.168.88.240';
 const PORT = 3000;
 
 const host = Platform.OS === 'android' ? (USE_PHYSICAL_PHONE ? PC_LAN_IP : '10.0.2.2') : 'localhost';

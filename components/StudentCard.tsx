@@ -1,3 +1,4 @@
+import { useRouter } from 'expo-router';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 // Fields returned by GET /students (see server/data.js).
@@ -9,9 +10,14 @@ export type Student = {
 };
 
 export default function StudentCard({ student }: { student: Student }) {
+  const router = useRouter();
+
   const handleViewDetails = () => {
-    // TODO EXAM: Check that the student has an id.
-    // TODO EXAM: Use Expo Router to navigate to /student/[id] with this student's id.
+    // Without an id there is nothing to open.
+    if (student.id === undefined || student.id === null) return;
+
+    // Opens app/student/[id].tsx with this student's id.
+    router.push({ pathname: '/student/[id]', params: { id: String(student.id) } });
   };
 
   return (

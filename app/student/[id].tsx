@@ -1,9 +1,9 @@
-/* eslint-disable @typescript-eslint/no-unused-vars -- State setters and loader are exam placeholders. */
 import { useEffect, useState } from 'react';
 import { Redirect, useLocalSearchParams, useRouter } from 'expo-router';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { type Student } from '@/components/StudentCard';
 import { useAuth } from '@/hooks/useAuth';
+import { ApiError, getStudent } from '@/lib/api';
 
 export default function StudentDetailsScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -14,16 +14,44 @@ export default function StudentDetailsScreen() {
   const [error, setError] = useState('');
 
   const loadStudent = async () => {
-    // TODO EXAM: Validate the id read from useLocalSearchParams().
-    // TODO EXAM: Set loading and clear previous errors.
-    // TODO EXAM: GET /students/{id} with fetch(), async/await, and a Bearer token.
-    // TODO EXAM: Check response.ok; handle 401 Unauthorized and missing records.
-    // TODO EXAM: Parse JSON and update student state.
-    // TODO EXAM: Handle errors and stop loading in finally.
+    // Validate the id from the route (/student/1 -> id = "1").
+    if (!id) {
+      setError('No student ID was provided.');
+      setLoading(false);
+      return;
+    }
+
+    // Show the loading state and clear any previous result.
+    setLoading(true);
+    setError('');
+    setStudent(null);
+
+    try {
+      // GET /students/{id} with the Bearer token (see lib/api.ts).
+      const data = await getStudent(id, token);
+      setStudent(data);
+    } catch (err) {
+      if (err instanceof ApiError && err.status === 404) {
+        // Not found: leave student empty so the "Student not found" message shows.
+      } else {
+        setError(
+          err instanceof TypeError
+            ? 'Cannot reach the server. Make sure the API is running (npm run api).'
+            : err instanceof Error
+              ? err.message
+              : 'Something went wrong while loading the student.'
+        );
+      }
+    } finally {
+      // Always stop loading, whether the request worked or failed.
+      setLoading(false);
+    }
   };
 
+  // Load again whenever the id in the URL changes.
   useEffect(() => {
-    // TODO EXAM: Call loadStudent() when id changes.
+    loadStudent();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- reload only when id changes
   }, [id]);
 
   // Route protection: unauthenticated users go to the real /sign-in URL.
@@ -35,13 +63,15 @@ export default function StudentDetailsScreen() {
       <Text style={styles.title}>Student Details</Text>
       {loading ? <View style={styles.state}><ActivityIndicator color="#245bb2" /><Text style={styles.text}>Loading student…</Text></View>
         : error ? <Text style={styles.error} accessibilityLiveRegion="polite">{error}</Text>
-        : !student ? <Text style={styles.text}>No student record available.</Text> : null}
-      <View style={styles.card}>
-        <Text style={styles.text}>ID: {id || 'Not available'}</Text>
-        <Text style={styles.text}>Name: {student?.name || '—'}</Text>
-        <Text style={styles.text}>Email: {student?.email || '—'}</Text>
-        <Text style={styles.text}>Course: {student?.course || '—'}</Text>
-      </View>
+        : !student ? <Text style={styles.text}>Student not found.</Text> : null}
+      {student ? (
+        <View style={styles.card}>
+          <Text style={styles.text}>ID: {student.id ?? id}</Text>
+          <Text style={styles.text}>Name: {student.name || '—'}</Text>
+          <Text style={styles.text}>Email: {student.email || '—'}</Text>
+          <Text style={styles.text}>Course: {student.course || '—'}</Text>
+        </View>
+      ) : null}
       <Pressable accessibilityRole="button" style={styles.button} onPress={() => router.back()}><Text style={styles.buttonText}>Back</Text></Pressable>
     </ScrollView>
   );
