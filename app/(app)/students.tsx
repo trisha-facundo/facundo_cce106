@@ -1,36 +1,55 @@
-/* eslint-disable @typescript-eslint/no-unused-vars -- State setters and loader are exam placeholders. */
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, FlatList, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import StudentCard, { type Student } from '@/components/StudentCard';
+import { getStudents } from '@/lib/api';
+import { useAuth } from '@/hooks/useAuth';
 
 export default function StudentsScreen() {
+  const { token } = useAuth();
   const [students, setStudents] = useState<Student[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [search, setSearch] = useState('');
 
   const loadStudents = async () => {
-    // TODO EXAM: 1. Set loading and clear previous errors.
-    // TODO EXAM: 2. Call GET /students using fetch() and async/await.
-    // TODO EXAM: 3. Include Authorization: Bearer TOKEN from useAuth() if required.
-    // TODO EXAM: 4. Check response.ok and handle 401 Unauthorized.
-    // TODO EXAM: 5. Parse JSON and save the student array to state.
-    // TODO EXAM: 6. Handle errors and stop loading inside finally.
+    // Show the loading state and clear any previous error.
+    setLoading(true);
+    setError('');
+
+    try {
+      // GET /students with the Bearer token (see lib/api.ts).
+      const data = await getStudents(token);
+      setStudents(data);
+    } catch (err) {
+      setError(
+        err instanceof TypeError
+          ? 'Cannot reach the server. Make sure the API is running (npm run api).'
+          : err instanceof Error
+            ? err.message
+            : 'Something went wrong while loading students.'
+      );
+    } finally {
+      // Always stop loading, whether the request worked or failed.
+      setLoading(false);
+    }
   };
 
+  // Load the students once when the screen opens.
   useEffect(() => {
-    // TODO EXAM: Call loadStudents() when the screen loads.
+    loadStudents();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- run once on mount
   }, []);
 
-  // TODO EXAM: Use filter() to return students whose name matches the search text.
-  const filteredStudents = students;
+  // Keep only the students whose name contains the search text (ignoring upper/lower case).
+  const searchText = search.trim().toLowerCase();
+  const filteredStudents = students.filter((student) => (student.name ?? '').toLowerCase().includes(searchText));
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Students</Text>
       <TextInput style={styles.input} accessibilityLabel="Search students" placeholder="Search by name" value={search} onChangeText={setSearch} />
       {loading ? (
-        <View style={styles.state}><ActivityIndicator color="#245bb2" /><Text style={styles.text}>Loading students…</Text><Text style={styles.note}>Complete loadStudents() to finish this state.</Text></View>
+        <View style={styles.state}><ActivityIndicator color="#245bb2" /><Text style={styles.text}>Loading students…</Text></View>
       ) : error ? (
         <View style={styles.state} accessibilityLiveRegion="polite"><Text style={styles.error}>{error}</Text><Pressable accessibilityRole="button" onPress={loadStudents}><Text style={styles.link}>Try Again</Text></Pressable></View>
       ) : (
@@ -38,7 +57,7 @@ export default function StudentsScreen() {
           data={filteredStudents}
           keyExtractor={(item, index) => String(item.id ?? index)}
           renderItem={({ item }) => <StudentCard student={item} />}
-          ListEmptyComponent={<View style={styles.state}><Text style={styles.text}>No students found.</Text></View>}
+          ListEmptyComponent={<View style={styles.state}><Text style={styles.text}>{students.length === 0 ? 'No students available.' : 'No students match your search.'}</Text></View>}
         />
       )}
     </View>

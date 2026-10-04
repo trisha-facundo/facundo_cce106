@@ -1,6 +1,6 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
-// TODO EXAM: Match these fields to the provided API response.
+// Fields returned by GET /students (see server/data.js).
 export type Student = {
   id?: string | number;
   name?: string | null;

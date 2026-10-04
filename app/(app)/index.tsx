@@ -3,12 +3,11 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useAuth } from '@/hooks/useAuth';
 
 export default function DashboardScreen() {
-  const { token } = useAuth();
-  // TODO EXAM: Replace placeholder user data with authenticated user information.
+  const { token, user } = useAuth();
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.eyebrow}>STUDENT SERVICE PORTAL</Text>
-      <Text style={styles.title}>Welcome, Student</Text>
+      <Text style={styles.title}>Welcome, {user?.name || 'Student'}</Text>
       <Text style={styles.subtitle}>Your student services in one place.</Text>
       <View style={styles.card}>
         <Text style={styles.heading}>Quick Actions</Text>
@@ -18,9 +17,8 @@ export default function DashboardScreen() {
       <View style={styles.card}>
         <Text style={styles.heading}>Session Status</Text>
         <Text style={styles.subtitle}>{token ? 'Authenticated' : 'Not Available'}</Text>
+        {user?.email ? <Text style={styles.subtitle}>Signed in as {user.email}</Text> : null}
       </View>
-      <Link href="/sign-in" style={styles.link}>Open Sign In</Link>
-      <Text style={styles.note}>Exam starter: screens are accessible while route protection is incomplete.</Text>
     </ScrollView>
   );
 }
@@ -34,6 +32,4 @@ const styles = StyleSheet.create({
   heading: { color: '#17324d', fontSize: 18, fontWeight: '600' },
   button: { backgroundColor: '#245bb2', padding: 16, borderRadius: 8 },
   buttonText: { color: '#ffffff', fontWeight: '600' },
-  link: { color: '#245bb2', paddingVertical: 10 },
-  note: { color: '#536579', fontSize: 12 },
 });

@@ -3,10 +3,10 @@
 const crypto = require('crypto');
 const cors = require('cors');
 const express = require('express');
-const { users } = require('./data');
+const { users, students } = require('./data');
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json());
@@ -34,6 +34,26 @@ app.post('/login', (req, res) => {
   sessions.set(token, user);
 
   res.status(200).json({ token, user });
+});
+
+// Middleware for protected routes.
+// Expects the header  Authorization: Bearer <token>  and checks the token we issued at login.
+function requireAuth(req, res, next) {
+  const header = req.headers.authorization || '';
+  const token = header.startsWith('Bearer ') ? header.slice(7) : '';
+  const user = sessions.get(token);
+
+  if (!user) {
+    return res.status(401).json({ message: 'Unauthorized. Please sign in again.' });
+  }
+
+  req.user = user;
+  next();
+}
+
+// GET /students  ->  [ { id, name, email, course }, ... ]   (protected)
+app.get('/students', requireAuth, (req, res) => {
+  res.status(200).json(students);
 });
 
 // '0.0.0.0' lets an Android emulator or phone on the same Wi-Fi reach this server.
